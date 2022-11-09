@@ -3,14 +3,15 @@ from piscat.BackgroundCorrection.DRA import DifferentialRollingAverage
 
 from piscat.GUI.BackgroundCorrection import DRA
 from piscat.GUI.Visualization.fun_display_localization import Visulization_localization
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2.QtCore import *
+from PySide6 import QtWidgets
+from PySide6 import QtCore
+from PySide6.QtCore import *
 
 
 class FUN_DRA(QtWidgets.QMainWindow, QtCore.QObject):
 
     update_output = QtCore.Signal(object)
+    update_pn_roi = QtCore.Signal(object)
     set_new_text = QtCore.Signal(object)
     set_plain_text = QtCore.Signal(object)
 
@@ -20,10 +21,12 @@ class FUN_DRA(QtWidgets.QMainWindow, QtCore.QObject):
         self.threadpool = QThreadPool()
 
         self.original_video = video
+        self.original_video_pn = None
         self.object_update_progressBar = object_update_progressBar
         self.DRA_video = None
         self.flag_thread_dra = True
         self.flag_update_original_video = True
+        self.flag_update_pn_video = False
 
     @Slot()
     def thread_DRA_complete(self):
@@ -41,8 +44,14 @@ class FUN_DRA(QtWidgets.QMainWindow, QtCore.QObject):
 
     @Slot()
     def update_original_video(self, video):
-        self.original_video = video[0]
-        self.flag_update_original_video = False
+        if self.flag_update_pn_video:
+            self.original_video_pn = video[0]
+            self.flag_update_pn_video = False
+            self.flag_update_original_video = False
+
+        else:
+            self.original_video = video[0]
+            self.flag_update_original_video = False
 
     @Slot()
     def startProgressBar(self, instance, **kwargs):
@@ -69,6 +78,7 @@ class FUN_DRA(QtWidgets.QMainWindow, QtCore.QObject):
                 self.set_new_text.emit("Start PN -->")
 
                 self.flag_update_original_video = True
+                self.flag_update_pn_video = True
                 worker = Normalization(self.original_video, flag_pn=True)
                 worker.signals.result.connect(self.update_original_video)
                 self.threadpool.start(worker)
@@ -85,15 +95,26 @@ class FUN_DRA(QtWidgets.QMainWindow, QtCore.QObject):
 
             if self.info_DRA.flag_FPN:
                 self.set_new_text.emit("Start DRA + " + self.info_DRA.mode_FPN + '-->')
-                d_arg = {'video': self.original_video, 'batchSize': self.info_DRA.batch_size, 'flag_GUI': True,
-                         'instance': DifferentialRollingAverage, 'FPN_flag': True, 'select_correction_axis': self.info_DRA.axis,
-                         'object_update_progressBar': self.object_update_progressBar, 'mode_FPN': self.info_DRA.mode_FPN}
+                if self.info_DRA.flag_power_normalization:
+                    d_arg = {'video': self.original_video_pn, 'batchSize': self.info_DRA.batch_size, 'flag_GUI': True,
+                             'instance': DifferentialRollingAverage, 'FPN_flag': True, 'select_correction_axis': self.info_DRA.axis,
+                             'object_update_progressBar': self.object_update_progressBar, 'mode_FPN': self.info_DRA.mode_FPN}
+                else:
+                    d_arg = {'video': self.original_video, 'batchSize': self.info_DRA.batch_size, 'flag_GUI': True,
+                             'instance': DifferentialRollingAverage, 'FPN_flag': True, 'select_correction_axis': self.info_DRA.axis,
+                             'object_update_progressBar': self.object_update_progressBar, 'mode_FPN': self.info_DRA.mode_FPN}
 
                 title = title + self.info_DRA.mode_FPN + '_'
 
             else:
                 self.set_new_text.emit("Start DRA -->")
-                d_arg = {'video': self.original_video, 'batchSize': self.info_DRA.batch_size, 'flag_GUI': True,
+                if self.info_DRA.flag_power_normalization:
+                    d_arg = {'video': self.original_video_pn, 'batchSize': self.info_DRA.batch_size, 'flag_GUI': True,
+                             'instance': DifferentialRollingAverage, 'FPN_flag': False, 'select_correction_axis': self.info_DRA.axis,
+                             'object_update_progressBar': self.object_update_progressBar, 'mode_FPN': self.info_DRA.mode_FPN}
+                else:
+
+                    d_arg = {'video': self.original_video, 'batchSize': self.info_DRA.batch_size, 'flag_GUI': True,
                              'instance': DifferentialRollingAverage, 'FPN_flag': False, 'select_correction_axis': self.info_DRA.axis,
                              'object_update_progressBar': self.object_update_progressBar, 'mode_FPN': self.info_DRA.mode_FPN}
 
@@ -132,7 +153,7 @@ class FUN_DRA(QtWidgets.QMainWindow, QtCore.QObject):
             self.info_DRA.window.close()
             self.dra_wrapper()
 
-    def run_DRA_from_bgtabs(self, mode_FPN, batch_size, flag_power_normalization, flag_FPN, axis):
+    def run_DRA_from_bgtabs(self, mode_FPN, batch_size, flag_power_normalization, roi_x_pn, roi_y_pn, flag_FPN, axis):
         title = ''
 
         if self.original_video is not None and self.original_video.shape[0] - (2 * batch_size) <= 0:
@@ -146,10 +167,13 @@ class FUN_DRA(QtWidgets.QMainWindow, QtCore.QObject):
 
             if flag_power_normalization:
                 self.set_new_text.emit("Start PN -->")
-
                 self.flag_update_original_video = True
+                self.flag_update_pn_video = True
+
                 worker = Normalization(self.original_video, flag_pn=True)
+                self.update_pn_roi.connect(worker.update_class_parameter)
                 worker.signals.result.connect(self.update_original_video)
+                self.update_pn_roi.emit([roi_x_pn, roi_y_pn])
                 self.threadpool.start(worker)
                 while self.flag_update_original_video:
                     QtCore.QCoreApplication.processEvents()
@@ -164,19 +188,31 @@ class FUN_DRA(QtWidgets.QMainWindow, QtCore.QObject):
 
             if flag_FPN:
                 self.set_new_text.emit("Start DRA + " + mode_FPN + '-->')
-                d_arg = {'video': self.original_video, 'batchSize': batch_size, 'flag_GUI': True,
-                         'instance': DifferentialRollingAverage, 'FPN_flag_GUI': True,
-                         'gui_select_correction_axis': axis,
-                         'object_update_progressBar': self.object_update_progressBar,
-                         'mode_FPN': mode_FPN}
+                if flag_power_normalization:
+                    d_arg = {'video': self.original_video_pn, 'batchSize': batch_size, 'flag_GUI': True,
+                             'instance': DifferentialRollingAverage, 'FPN_flag_GUI': True,
+                             'gui_select_correction_axis': axis,
+                             'object_update_progressBar': self.object_update_progressBar,
+                             'mode_FPN': mode_FPN}
+                else:
+                    d_arg = {'video': self.original_video, 'batchSize': batch_size, 'flag_GUI': True,
+                             'instance': DifferentialRollingAverage, 'FPN_flag_GUI': True,
+                             'gui_select_correction_axis': axis,
+                             'object_update_progressBar': self.object_update_progressBar,
+                             'mode_FPN': mode_FPN}
 
                 title = title + mode_FPN + '_'
 
             else:
                 self.set_new_text.emit("Start DRA -->")
-                d_arg = {'video': self.original_video, 'batchSize': batch_size, 'flag_GUI': True, 'mode_FPN': mode_FPN,
-                         'instance': DifferentialRollingAverage, 'FPN_flag_GUI': False, 'gui_select_correction_axis': axis,
-                         'object_update_progressBar': self.object_update_progressBar}
+                if flag_power_normalization:
+                    d_arg = {'video': self.original_video_pn, 'batchSize': batch_size, 'flag_GUI': True, 'mode_FPN': mode_FPN,
+                             'instance': DifferentialRollingAverage, 'FPN_flag_GUI': False, 'gui_select_correction_axis': axis,
+                             'object_update_progressBar': self.object_update_progressBar}
+                else:
+                    d_arg = {'video': self.original_video, 'batchSize': batch_size, 'flag_GUI': True, 'mode_FPN': mode_FPN,
+                             'instance': DifferentialRollingAverage, 'FPN_flag_GUI': False, 'gui_select_correction_axis': axis,
+                             'object_update_progressBar': self.object_update_progressBar}
 
             self.flag_thread_dra = True
             self.flag_update_dra = True

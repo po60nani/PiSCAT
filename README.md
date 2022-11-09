@@ -1,3 +1,7 @@
+<a href="https://zenodo.org/badge/latestdoi/360498327"><img src="https://zenodo.org/badge/360498327.svg" alt="DOI"></a>
+
+<a style="border-width:0" href="https://doi.org/10.21105/joss.04024"><img src="https://joss.theoj.org/papers/10.21105/joss.04024/status.svg" alt="DOI badge" ></a>
+
 ![](https://github.com/SandoghdarLab/PiSCAT/blob/28eafb06ea4f6b468dde70e33fa970d1699974cf/docs/Fig/PiSCAT_logo_bg.png)
 
 # PiSCAT: An open source package in Python for interferometric Scattering Microscopy ([Homepage](https://piscat.readthedocs.io))
@@ -50,8 +54,27 @@ python -m piscat.Tutorials
 ```
 
 ## Citing PiSCAT
+<a style="border-width:0" href="https://doi.org/10.21105/joss.04024"><img src="https://joss.theoj.org/papers/10.21105/joss.04024/status.svg" alt="DOI badge" ></a>
 
-TODO
+If you use PiSCAT in a scientific publication or for its API or design, we would appreciate citations to the
+following paper:
+
+[1] Mirzaalian Dastjerdi, Houman, et al. "PiSCAT: A Python Package for Interferometric Scattering Microscopy." The Journal of Open Source Software 7.71 (2022). ([Journal](https://doi.org/10.21105/joss.04024))
+
+Bibtex entry:
+
+    @article{Dastjerdi2022,
+      doi = {10.21105/joss.04024},
+      url = {https://doi.org/10.21105/joss.04024},
+      year = {2022},
+      publisher = {The Open Journal},
+      volume = {7},
+      number = {71},
+      pages = {4024},
+      author = {Houman Mirzaalian Dastjerdi and Reza Gholami Mahmoodabadi and Matthias Bär and Vahid Sandoghdar and Harald Köstler},
+      title = {PiSCAT: A Python Package for Interferometric Scattering Microscopy},
+      journal = {Journal of Open Source Software}
+    }
 
 ## Testing
 
@@ -67,4 +90,7 @@ python setup.py test
 2.	Create a virtual environment based on the instructions provided [here](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html).
 3.  Follow [this link](https://www.jetbrains.com/help/pycharm/creating-and-running-setup-py.html) to select PiSCAT venv as the interpreter, to install the setup.py file and then to run a setup.py task. 
 
+# Contributing
+
+Contributions to PiSCAT are always welcome, and they are greatly appreciated! Our contribution policy can be found [here](https://github.com/SandoghdarLab/PiSCAT/blob/main/CONTRIBUTING.md).
 

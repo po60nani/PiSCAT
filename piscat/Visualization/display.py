@@ -1,6 +1,6 @@
 from __future__ import print_function
-from PySide2 import QtCore
-from PySide2.QtCore import *
+from PySide6 import QtCore
+from PySide6.QtCore import *
 
 import imageio
 import numpy as np
@@ -124,7 +124,7 @@ class DisplaySubplot():
             self.pressed_key['key'] = event.key
 
 
-class Display():
+class Display:
 
     def __init__(self, video, step=0, color='gray', time_delay=0, median_filter_flag=False):
         """

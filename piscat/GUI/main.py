@@ -22,11 +22,11 @@ from piscat.GUI.Memory.video_in_memory import VideoInMemory
 from piscat.GUI.Visualization.fun_display_localization import Visulization_localization
 from piscat import version
 
-from PySide2 import QtGui
-from PySide2 import QtCore
-from PySide2 import QtWidgets
-from PySide2.QtCore import *
-from PySide2.QtWebEngineWidgets import *
+from PySide6 import QtGui
+from PySide6 import QtCore
+from PySide6 import QtWidgets
+from PySide6.QtCore import *
+from PySide6.QtWebEngineWidgets import *
 from functools import partial
 
 warnings.filterwarnings('ignore')
@@ -99,7 +99,7 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         #--------File------
         fileMenu = menubar.addMenu('&File')
 
-        open_file = QtWidgets.QAction(QtGui.QIcon('folder.ico'), 'Open', self)
+        open_file = QtGui.QAction(QtGui.QIcon('folder.ico'), 'Open', self)
         # open_file.setShortcut('Ctrl+S')
         open_file.setStatusTip('Open new File')
         fileMenu.addAction(open_file)
@@ -108,6 +108,9 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         imp = fileMenu.addMenu("Import")
         open_im2vid = imp.addAction("Image Sequence to video")
         self.connect(open_im2vid, QtCore.SIGNAL('triggered()'), self.image2video_loading_wrapper)
+
+        open_tiff_vid = imp.addAction("TIFF")
+        self.connect(open_tiff_vid, QtCore.SIGNAL('triggered()'), self.tiff_video_loading_wrapper)
 
         load_python_script = imp.addAction("Run Python script")
         self.connect(load_python_script, QtCore.SIGNAL('triggered()'), Reading().run_py_script)
@@ -119,7 +122,7 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         # --------Setting--------
         setting_menu = menubar.addMenu('&Setting')
 
-        setting_cpu = QtWidgets.QAction(QtGui.QIcon('folder.ico'), 'CPU_Configurations', self)
+        setting_cpu = QtGui.QAction(QtGui.QIcon('folder.ico'), 'CPU_Configurations', self)
         # setting_cpu.setShortcut('Ctrl+O')
         setting_cpu.setStatusTip('Open new File')
         setting_menu.addAction(setting_cpu)
@@ -133,7 +136,7 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         self.video_in_memory_flag = {'original_video': False, 'DRA_video': False, 'Protein_Tracking': False, 'GUV3D': False,
                                      'arc_cos': False, 'PSF Clustering': False, 'Template_matching': False}
 
-        Display_video_in_memory = QtWidgets.QAction(QtGui.QIcon('folder.ico'), 'Load videos', self)
+        Display_video_in_memory = QtGui.QAction(QtGui.QIcon('folder.ico'), 'Load videos', self)
         # open_file.setShortcut('Ctrl+S')
         Display_video_in_memory.setStatusTip('Display')
         view_menu.addAction(Display_video_in_memory)
@@ -143,19 +146,19 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         # --------Process--------
         process_menu = menubar.addMenu('&Process')
 
-        spectrum = QtWidgets.QAction(QtGui.QIcon('folder.ico'), 'FFT', self)
+        spectrum = QtGui.QAction(QtGui.QIcon('folder.ico'), 'FFT', self)
         # open_file.setShortcut('Ctrl+S')
         spectrum.setStatusTip('FFT')
         process_menu.addAction(spectrum)
         self.connect(spectrum, QtCore.SIGNAL('triggered()'), self.spectrum_init)
 
-        image_calculator = QtWidgets.QAction(QtGui.QIcon('folder.ico'), 'Image calculator', self)
+        image_calculator = QtGui.QAction(QtGui.QIcon('folder.ico'), 'Image calculator', self)
         # open_file.setShortcut('Ctrl+S')
         image_calculator.setStatusTip('Image calculator')
         process_menu.addAction(image_calculator)
         self.connect(image_calculator, QtCore.SIGNAL('triggered()'), self.analysis_wrapper)
 
-        image_calculator_2 = QtWidgets.QAction(QtGui.QIcon('folder.ico'), 'Image calculator constant number', self)
+        image_calculator_2 = QtGui.QAction(QtGui.QIcon('folder.ico'), 'Image calculator constant number', self)
         # open_file.setShortcut('Ctrl+S')
         image_calculator_2.setStatusTip('Image calculator constant number')
         process_menu.addAction(image_calculator_2)
@@ -165,16 +168,16 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         # --------Analyze.--------
         analyze_menu = menubar.addMenu('&Analyze')
 
-        noise_floor = QtWidgets.QAction('Noise Floor', self)
+        noise_floor = QtGui.QAction('Noise Floor', self)
         # open_file.setShortcut('Ctrl+R')
         noise_floor.setStatusTip('Noise Floor.')
         self.connect(noise_floor, QtCore.SIGNAL('triggered()'), self.noise_floor)
 
-        protein_track = QtWidgets.QAction("iSCAT Protein", self)
+        protein_track = QtGui.QAction("iSCAT Protein", self)
         protein_track.setStatusTip("iSCAT Protein")
         self.connect(protein_track, QtCore.SIGNAL('triggered()'), self.protein_projects)
 
-        iPSF_model = QtWidgets.QAction("iPSF model", self)
+        iPSF_model = QtGui.QAction("iPSF model", self)
         iPSF_model.setStatusTip("iPSF model")
         self.connect(iPSF_model, QtCore.SIGNAL('triggered()'), self.iPSF_projects)
 
@@ -187,17 +190,17 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         # --------Help-----------
         help_menu = menubar.addMenu('&Help')
 
-        help = QtWidgets.QAction('Help', self)
+        help = QtGui.QAction('Help', self)
         # open_file.setShortcut('Ctrl+R')
         help.setStatusTip('Help.')
         self.connect(help, QtCore.SIGNAL('triggered()'), self.help)
 
-        tutorials = QtWidgets.QAction('tutorials', self)
+        tutorials = QtGui.QAction('tutorials', self)
         # open_file.setShortcut('Ctrl+R')
         tutorials.setStatusTip('tutorials.')
         self.connect(tutorials, QtCore.SIGNAL('triggered()'), self.tutorials)
 
-        about = QtWidgets.QAction('About', self)
+        about = QtGui.QAction('About', self)
         # open_file.setShortcut('Ctrl+R')
         about.setStatusTip('About.')
         self.connect(about, QtCore.SIGNAL('triggered()'), self.about)
@@ -205,18 +208,17 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         help_menu.addAction(help)
         # help_menu.addAction(tutorials)
         help_menu.addAction(about)
-
         # --------About-----------
 
         # --------Information Box--------
-        save_txt = QtWidgets.QAction('Report', self)
+        save_txt = QtGui.QAction('Report', self)
         # save_txt.setShortcut('Ctrl+Q')
         save_txt.setStatusTip('save history')
         save_txt.triggered.connect(self.save_text_history)
         toolbar_save = self.addToolBar('Save')
         toolbar_save.addAction(save_txt)
 
-        clear_txt = QtWidgets.QAction('Clear', self)
+        clear_txt = QtGui.QAction('Clear', self)
         # exitAction.setShortcut('Ctrl+Q')
         clear_txt.setStatusTip('clear Information Box')
         clear_txt.triggered.connect(self.clear_plain_text)
@@ -224,7 +226,7 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         toolbar_clear = self.addToolBar('Clear')
         toolbar_clear.addAction(clear_txt)
 
-        exitAction = QtWidgets.QAction('Exit', self)
+        exitAction = QtGui.QAction('Exit', self)
         # exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.closeEvent)
@@ -307,6 +309,11 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
         self.reading.update_output.connect(partial(self.updata_input_video, label='loading'))
         self.reading.im2video()
 
+    def tiff_video_loading_wrapper(self):
+        self.reading = Reading()
+        self.reading.update_output.connect(partial(self.updata_input_video, label='loading'))
+        self.reading.tiff_video()
+
     def noise_floor(self):
         self.noise_floor_ = Noise_Floor(video=self.original_video)
 
@@ -328,7 +335,10 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
             self.list_available_video['DRA_video'] = True
             status_line_info = None
         else:
-            status_line_info = data_in[3]
+            try:
+                status_line_info = data_in[3]
+            except:
+                status_line_info = None
             self.original_video = data_in[0]
             self.list_available_video['original_video'] = True
         title = data_in[1]
@@ -351,12 +361,11 @@ class PiSCAT_GUI(QtWidgets.QMainWindow):
 
         elif 'DRA_video' == data_in:
             self.visualization_ = Visulization_localization()
-            self.visualization_.new_display(self.dra_video, self.dra_video, object=None,
-                                            title='DRA', mask_status=False)
+            self.visualization_.new_display(self.dra_video, self.dra_video, object=None, title='DRA', mask_status=False)
+
         elif 'iPSF_Model_I' == data_in[0] or 'iPSF_Model_II' == data_in[0]:
             self.visualization_ = Visulization_localization()
-            self.visualization_.new_display(data_in[1], data_in[1],
-                                            object=self.iPSF_gui, title='iPSF Model', mask_status=False)
+            self.visualization_.new_display(data_in[1], data_in[1], object=self.iPSF_gui, title='iPSF Model', mask_status=False)
 
     def tutorials(self):
         subprocess.run('python -m piscat.Tutorials', shell=True)

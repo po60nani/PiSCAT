@@ -3,6 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. image:: https://joss.theoj.org/papers/10.21105/joss.04024/status.svg
+   :target: https://doi.org/10.21105/joss.04024
+
+.. image:: https://zenodo.org/badge/360498327.svg
+   :target: https://zenodo.org/badge/latestdoi/360498327
 
 PiSCAT: An open source package in Python for interferometric Scattering Microscopy
 ==================================================================================
@@ -49,6 +54,12 @@ the file in structured ways and to embed metadata as well, making it self-descri
 
 PiSCAT:
 -------
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Please cite us:
+
+   cite_us
 
 .. toctree::
    :maxdepth: 1

@@ -1,11 +1,16 @@
 from __future__ import print_function
 from skimage import io
+from PIL import Image
 from skimage.color import rgb2gray
 from astropy.io import fits
+from tqdm.autonotebook import tqdm
+from joblib import Parallel, delayed
 import os
 import pandas as pd
 import numpy as np
 import cv2
+import tifffile
+from flifile import FliFile
 
 
 def video_reader(file_name, type='binary', img_width=128, img_height=128, image_type=np.dtype('<f8'), s_frame=0, e_frame=-1):
@@ -25,6 +30,8 @@ def video_reader(file_name, type='binary', img_width=128, img_height=128, image_
             * 'avi': use this flag to load avi
             * 'png': use this flag to load png
             * 'fits': use this flag to load fits
+            * 'fli': use this flag to load fli
+
 
     optional_parameters:
         These parameters are used when video 'bin_type' define as binary.
@@ -63,6 +70,8 @@ def video_reader(file_name, type='binary', img_width=128, img_height=128, image_
         video = read_png(file_name)
     elif type == 'fits':
         video = read_fits(file_name)
+    elif type == 'fli':
+        video = read_fli(file_name)
     return video
 
 
@@ -124,7 +133,42 @@ def read_tif(filename):
         The video is 3D-numpy (number of frames, width, height).
 
     """
-    vid_ = io.imread(filename)
+    vid_ = tifffile.imread(filename)
+
+    if vid_.ndim == 4:
+        frames_list = []
+        for i_ in range(vid_.shape[0]):
+            gray = cv2.cvtColor(vid_[i_, ...], cv2.COLOR_BGR2GRAY)
+            frames_list.append(gray)
+    else:
+        frames_list = vid_
+
+    frames_list = np.asarray(frames_list)
+    return frames_list
+
+
+def read_tif_iterate(filename):
+    """
+    Reading image/video with TIF format.
+
+    Parameters
+    ----------
+    file_name: str
+        Path and name of TIF image/video.
+
+    Returns
+    -------
+    @returns: NDArray
+        The video is 3D-numpy (number of frames, width, height).
+
+    """
+    vid_ = []
+    with tifffile.TiffFile(filename) as tif:
+        for page in tqdm(tif.pages):
+            image = page.asarray()
+            vid_.append(image)
+    vid_ = np.array(vid_)
+
     if vid_.ndim == 4:
         frames_list = []
         for i_ in range(vid_.shape[0]):
@@ -182,8 +226,13 @@ def read_png(filename):
         The video is 2D-numpy (width, height).
     """
     img = io.imread(filename)
-    grayscale = rgb2gray(img)
+    if len(img.shape) == 3:
+        grayscale = rgb2gray(img)
+    elif len(img.shape) == 2:
+        grayscale = img
+
     return grayscale
+
 
 def read_fits(filename):
     """
@@ -202,6 +251,28 @@ def read_fits(filename):
     """
     hdul = fits.open(filename)
     return hdul[0].data
+
+
+def read_fli(filename):
+    """
+    Reading image/video with fli format.
+
+    Parameters
+    ----------
+    file_name: str
+        Path and name of fits image/video.
+
+    Returns
+    -------
+    @returns: NDArray
+        The video as 3D-numpy with the following shape (number of frames, width, height)
+
+    """
+    myflifile = FliFile(filename)
+    data = myflifile.getdata()
+    data_ = np.transpose(data, (2, 0, 1))
+    return data_
+
 
 
 class DirectoryType:
